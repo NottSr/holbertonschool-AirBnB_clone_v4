@@ -1,27 +1,29 @@
-$(function () {
-  function ToArray(amenities) {
-    $('.amenities H4').text(Object.values(amenities).join(', '));
-  }
+$(document).ready(function () {
+  const dict = {};
+  const $amenitiesCheck = $('input[type=checkbox]');
+  const $selectedAmenities = $('div.amenities h4');
+  const $statusIndicator = $('div#api_status');
+  const statusUri = 'http://localhost:5001/api/v1/status/';
 
-  const allAmenities = {};
-  $('.amenities input').on('change', function () {
+  $amenitiesCheck.click(function () {
     if ($(this).is(':checked')) {
-      allAmenities[$(this).attr('data-id')] = $(this).attr('data-name');
-    } else {
-      delete allAmenities[$(this).attr('data-id')];
+      dict[$(this).data('id')] = $(this).data('name');
+      $selectedAmenities.text(Object.values(dict).join(', '));
+    } else if ($(this).is(':not(:checked)')) {
+      delete dict[$(this).data('id')];
+      $selectedAmenities.text(Object.values(dict).join(', '));
     }
-    ToArray(allAmenities);
   });
+
   $.ajax({
-    url: 'http://0.0.0.0:5001/api/v1/status/',
+    url: statusUri,
     type: 'GET',
     dataType: 'json',
     success: function (data) {
       if (data.status === 'OK') {
-        $("div#api_status").addClass("available")
-      }
-      else {
-        $("div#api_status").removeClass("available")
+        $statusIndicator.addClass('available');
+      } else {
+        $statusIndicator.removeClass('available');
       }
     }
   });
